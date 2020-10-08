@@ -1,14 +1,18 @@
 module Main where
 
-import "parsec" Text.Parsec (ParsecT, try, many, parse, noneOf, char, count)
+import "attoparsec" Data.Attoparsec.Text
+import "base" Control.Applicative (many)
+import "text" Data.Text (Text)
 
-data TT = TT String [TT] deriving Show
+import qualified "text" Data.Text.IO as T
 
-indented :: Monad m => Int -> ParsecT String u m TT
-indented level = TT <$> try item <*> many (indented $ level + 1) where
+data TT a = TT a [TT a] deriving Show
 
-	item :: Monad m => ParsecT String u m String
-	item = count level (char '\t') *> many (noneOf "\t\n") <* char '\n'
+indented :: Int -> Parser (TT Text)
+indented level = TT <$> subitem <*> many (indented $ level + 1) where
+
+	subitem :: Parser Text
+	subitem = count level (char '\t') *> takeTill (== '\n') <* (char '\n')
 
 main :: IO ()
-main = readFile "resources/example.txt" >>= print . parse (indented 0) ""
+main = T.readFile "resources/example.txt" >>= print . parseOnly (indented 0)

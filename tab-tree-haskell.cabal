@@ -39,7 +39,7 @@ library
 
 executable tab-tree-parser-example
   main-is: Main.hs
-  build-depends: base, parsec
+  build-depends: base, attoparsec, text
   default-extensions:
     ConstraintKinds
     ExistentialQuantification
