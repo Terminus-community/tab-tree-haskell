@@ -1,9 +1,9 @@
 module Main where
 
-import "attoparsec" Data.Attoparsec.Text
+import "attoparsec" Data.Attoparsec.Text (Parser, parseOnly, char, count, space, takeTill)
 import "base" Control.Applicative (many, (<|>))
 import "joint" Control.Joint ((<$$>), (<$$$>))
-import "text" Data.Text (Text, pack)
+import "text" Data.Text (Text)
 
 import qualified "text" Data.Text.IO as T
 
