@@ -1,7 +1,7 @@
 module Main where
 
 import "attoparsec" Data.Attoparsec.Text
-import "base" Control.Applicative (many)
+import "base" Control.Applicative (many, (<|>))
 import "joint" Control.Joint ((<$$>), (<$$$>))
 import "text" Data.Text (Text, pack)
 
@@ -20,7 +20,13 @@ indented level = TT <$> subitem <*> many (indented $ level + 1) where
 
 type Predicate = Text
 
-type Object = Text
+data Object = Description Text | Code Text deriving Show
+
+object :: Parser Object
+object = code <|> description where
+
+	code = Code <$> (char '`' *> takeTill (== '`') <* char '`')
+	description = Description <$> takeTill (== ' ')
 
 data Property = Property Predicate Object deriving Show
 
@@ -32,7 +38,8 @@ item :: Parser Item
 item = Item <$> takeTill (== ' ') <*> many (space *> property)
 
 property :: Parser Property
-property = Property <$> takeTill (== ':') <*> (char ':' *> takeTill (== ' '))
+property = Property <$> takeTill (== ':') <*> (char ':' *> object)
 
 main :: IO ()
-main = print =<< parseOnly item <$$$> parseOnly (indented 0) <$> T.readFile "resources/example.txt"
+main = print =<< parseOnly item <$$$> parseOnly (indented 0)
+	<$> T.readFile "resources/russia_elx.tree.txt"
